@@ -98,4 +98,5 @@ int main(int argc, char *argv[])
 	thread_join(&thd1, NULL);
 	thread_join(&thd2, NULL);
 	thread_join(&thd3, NULL);
+
 }

@@ -22,7 +22,6 @@ int main()
 {
 	thread_t thd[6];
 	int params[6], rv[6], i;
-	
 	thread_init();
 	printf("BEGIN: Time stamp: %ld\n", get_timer());
 	for (i = 0; i < 6; i++) {

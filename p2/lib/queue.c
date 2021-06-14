@@ -6,26 +6,53 @@
   may need to define additional functions if you want to implement the
   extra-point functionality.
  */
-// TODO: inicializes a queue
-void queue_init(node_t * queue)
+
+node_t* node_init(tcb_t* tcb)
 {
+  node_t* node = (node_t*)malloc(sizeof(node_t));
+  node->next = NULL;
+  node->tcb = tcb;
+  return node;
+}
+// TODO: inicializes a queue
+void queue_init(queue_t * queue)
+{
+  queue->front = NULL;
+  queue->rear = NULL;
 }
 
 // TODO: returns the first element of the queue
-node_t *dequeue(node_t * queue)
+node_t *dequeue(queue_t * queue)
 {
-	return NULL;
+	node_t* first = queue->front;
+
+  //remove primeiro elemento?
+  if(first != NULL) 
+    queue->front = first->next;
+  else
+  {
+    queue->front = NULL;
+    queue->rear = NULL;
+  }
+  
+  return first;
 }
 
-// TODO: inserts a node in a queue
-void enqueue(node_t * queue, node_t * item)
+// TODO: inserts a node in a queue 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
+void enqueue(queue_t * queue, node_t * item)
 {
+  if(queue->rear == NULL)
+    queue->front = item;
+  else
+    queue->rear->next = item; 
+  
+  queue->rear = item;
 }
 
 // TODO: checks if a queue is empty
-int is_empty(node_t *queue)
+int is_empty(queue_t *queue)
 {
-	return 0;
+	return queue->front == NULL;
 }
 
 

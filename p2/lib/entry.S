@@ -1,4 +1,4 @@
-	.equ	USER,16
+	.equ	USER,8
 	.equ	CONTEXT_SIZE,136
 	
 #define	SAVE_CONTEXT(offset) \
@@ -60,4 +60,3 @@ scheduler_entry:
 	call	scheduler
 	RESTORE_CONTEXT(USER)
 	ret
-
