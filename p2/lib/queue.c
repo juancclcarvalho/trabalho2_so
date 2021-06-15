@@ -7,7 +7,7 @@
   extra-point functionality.
  */
 
-node_t* node_init(tcb_t* tcb)
+node_t* node_init(void* tcb)
 {
   node_t* node = (node_t*)malloc(sizeof(node_t));
   node->next = NULL;
@@ -28,12 +28,15 @@ node_t *dequeue(queue_t * queue)
 
   //remove primeiro elemento?
   if(first != NULL) 
-    queue->front = first->next;
-  else
   {
-    queue->front = NULL;
-    queue->rear = NULL;
+    // remove o primeiro elemento e atualiza o começo da fila
+    queue->front = first->next;
+    // precisa verificar se o começo eh nulo
+    if(queue->front == NULL) 
+      queue->rear = NULL;
   }
+  else
+    queue->rear = NULL;
   
   return first;
 }

@@ -3,11 +3,11 @@
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <thread.h>
+
 
 struct node {
    struct node* next;
-   tcb_t* tcb;
+   void* tcb;
 };
 
 typedef struct node node_t;

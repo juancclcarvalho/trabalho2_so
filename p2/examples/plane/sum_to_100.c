@@ -16,9 +16,9 @@ void sum_to_100(void *p)
 	clear();
 	sleep_time *= 1000;
 	for (i = 0; i <= 100; i++) {
-		print_str(15, 0, "Did you know that 1 + ... + ");
+		print_str(20, 0, "Did you know that 1 + ... + ");
 		sum = rec(i);
-		gotoxy(29, 15);
+		gotoxy(29, 20);
 		printf("%d = %d \n", i, sum);
 		fflush(stdout);
 		print_counter(FALSE);

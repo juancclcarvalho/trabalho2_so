@@ -1,4 +1,4 @@
-	.equ	USER,8
+	.equ	USER,16
 	.equ	CONTEXT_SIZE,136
 	
 #define	SAVE_CONTEXT(offset) \

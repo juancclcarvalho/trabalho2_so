@@ -5,14 +5,36 @@
 #include <threadu.h>
 #include "util.h"
 
-#define ROWS 4
-#define COLUMNS 18
+#define ROWS 18
+#define COLUMNS 78
 
-static char picture[ROWS][COLUMNS + 1] = {
+/* static char picture[ROWS][COLUMNS + 1] = {
     "     ___       _  ",
     " | __\\_\\_o____/_| ",
     " <[___\\_\\_-----<  ",
     " |  o'            "
+}; */
+
+static char picture[ROWS][COLUMNS + 1] = {
+"   .-~~^-.",
+" .'  O    \\",
+"(_____,    \\",
+" `----.     \\",
+"       \\    \\",
+"        \\    \\",
+"         \\     `.             _ _",
+"          \\       ~- _ _ - ~       ~ - .",
+"           \\                              ~-.",
+"            \\                                `.",
+"             \\    /               /      \\    \\",
+"              `. |         }     |         }     \\",
+"                `|        /      |        /       \\",
+"                 |       /       |       /          \\",
+"                 |      /`- _ _ _|      /.- ~ ^-.     \\",
+"                 |     /         |     /          `.    \\",
+"                 |     |         |     |             -.   ` . _ _ _ _ _ _",
+"                 |_____|         |_____|                ~ . _ _ _ _ _ _ _ >"
+
 };
 
 static void draw(int locx, int locy, int plane);

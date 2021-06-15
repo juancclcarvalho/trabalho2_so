@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <threadu.h>
+#include <queue.h>
 
 #define NUMBER_OF_REGISTERS	15
 #define STACK_SIZE		2048
@@ -21,6 +22,7 @@ typedef enum {
 typedef struct tcb {
 	int TID; // 4 bytes
 	status_t status; //4 bytes
+	void *(*start_routine)(void *); // 8 bytes
 	// temos 8 bytes antes dos registradores
 	uint64_t flags; // registrador de flags
 	uint64_t registers[NUMBER_OF_REGISTERS];
@@ -28,5 +30,8 @@ typedef struct tcb {
 	uint64_t* stack[STACK_SIZE];
 	// TODO: define the fields for you TCB
 } tcb_t;
+
+queue_t	ready_queue;
+tcb_t	*current_running;
 
 #endif /* THREAD_H */

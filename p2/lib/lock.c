@@ -1,8 +1,8 @@
 #include <lock.h>
-#include <threadu.h>
+#include <stdio.h>
 
 enum {
-      SPIN = TRUE,
+      SPIN = FALSE,
 };
 
 // TODO: inicializes a lock
@@ -11,6 +11,11 @@ void lock_init(lock_t * l)
 	if (SPIN) {
 		l->status = UNLOCKED;
 	} else {
+		// inicializa a fila de threads travadas
+		queue_t* q = (queue_t*) malloc(sizeof(queue_t));
+		queue_init(q);
+		l->q = q;
+		l->status = UNLOCKED;
 	}
 }
 
@@ -23,6 +28,9 @@ void lock_acquire(lock_t * l)
 			thread_yield();
 		l->status = LOCKED;
 	} else {
+		if(LOCKED == l->status)
+			block(l);
+		l->status = LOCKED;
 	}
 }
 
@@ -33,15 +41,34 @@ void lock_release(lock_t * l)
 	if (SPIN) {
 		l->status = UNLOCKED;
 	} else {
+		if (l->q->rear == NULL) // SE A LISTA DE THREADS ESPERANDO O LOCK ESTIVER VAZIA
+			l->status = UNLOCKED; // O lock é destravado
+		else
+			unblock(l);	
 	}
 }
 
 // TODO: blocks the running thread
-void block()
+void block(lock_t * l)
 {
+	enqueue(l->q, node_init(current_running));
+	current_running->status = LOCKED;
+	scheduler_entry(); // <--- isso vai fazer a troca de contexto, e NÂO inserir a thread travada na ready queue
 }
 
 // TODO: unblocks  a thread that is waiting on a lock.
 void unblock(lock_t *l)
 {
+	node_t* released_thread = dequeue(l->q);
+	enqueue(&ready_queue, released_thread);
+	tcb_t* tcb = released_thread->tcb;
+	tcb->status = READY;
 }
+
+
+/*
+	O
+	José
+	Tem
+	Coito
+*/

@@ -3,11 +3,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <queue.h>
 #include <thread.h>
 
-queue_t	ready_queue;
-tcb_t	*current_running;
 
 int tid_global = 0;
 
@@ -25,7 +22,7 @@ int thread_init()
 	tcb_t* main_thread = (tcb_t*)malloc(sizeof(tcb_t));
 	// inicializa ready queue
 	queue_init(&ready_queue);
-	// current running aponta pra tcb da main
+	// current running aponta pra tcb da main 
 	current_running = main_thread;
 	// definir status_t(enum) da tcb como running
 	main_thread->status = FIRST_TIME;
@@ -43,7 +40,7 @@ int thread_create(thread_t *thread, void *(*start_routine)(void *), void *arg)
 	tcb_t* new_thread = (tcb_t*)malloc(sizeof(tcb_t));
 	// coloca o start routine no ultimo indice da pilha, por conta do ret
 	//printf("2\n");
-	new_thread->stack[STACK_SIZE - 1] = start_routine;
+	new_thread->stack[STACK_SIZE - 1] = &exit_handler;
 	// campo rsp da nova tcb aponta pro ultimo indice da pilha
 	//printf("3\n");
 	new_thread->rsp = &new_thread->stack[STACK_SIZE - 1];
@@ -59,7 +56,9 @@ int thread_create(thread_t *thread, void *(*start_routine)(void *), void *arg)
 	//printf("7\n");
 	enqueue(&ready_queue, node);
 	new_thread->TID = tid_global++;
+	new_thread->start_routine = start_routine;
 	thread->tcb = new_thread;
+	
 	//printf("  Conseguiu criar nova thread com sucesso, TID == %d\n", new_thread->TID);
 	return 0;
 }
@@ -114,8 +113,8 @@ void scheduler()
 	node_t* node = dequeue(&ready_queue);
 	current_running = node->tcb;
 	//printf("current running == %llu\n", current_running);
-	if (current_running->status != FIRST_TIME)
-		current_running->stack[STACK_SIZE - 1] = &exit_handler;
+	//if (current_running->status != FIRST_TIME)
+		//current_running->stack[STACK_SIZE - 1] = &exit_handler;
 	current_running->status = RUNNING;
 	//printf("  sqúediu termionu e pah\n");
 	//printf("%lu\n",sizeof(int));
@@ -123,9 +122,11 @@ void scheduler()
 
 // TODO: you must  make sure this function is called  if a thread does
 // not call thread_exit
-void exit_handler()
+void exit_handler(void *arg)
 {
-	//printf("ah ieie");
+	//printf("vai rodar a funcao\n");
+	current_running->start_routine(arg);
+	//printf("ah ieie\n");
 	thread_exit(0);
 }
 
