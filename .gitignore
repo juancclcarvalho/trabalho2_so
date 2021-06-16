@@ -34,9 +34,7 @@
 *.so.*
 *.dylib
 
-# Executables
-*
-!*.*
+# Executable
 *.exe
 *.out
 *.app

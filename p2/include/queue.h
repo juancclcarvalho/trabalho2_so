@@ -27,7 +27,7 @@ void queue_init(queue_t * queue);
 node_t *dequeue(queue_t * queue);
 
 /* Add item to the back of the queue */
-void enqueue(queue_t * queue, node_t * item);
+void enqueue(queue_t * queue, node_t * item, int priority);
 
 /* Determine if the queue is empty.
  * Returns 1 if the queue is empty.
@@ -45,6 +45,7 @@ node_t *peek(queue_t *queue);
  *  0 otherwise.
  */
 typedef int (*node_lte)(node_t *a, node_t *b);
+int lt(node_t *a, node_t *b);
 
 /* Insert this item /elt/ into the queue /q/
  * in ascending order with the less-than-or-equal-to

@@ -1,4 +1,5 @@
-#include <queue.h>
+#include <thread.h>
+#include <stdio.h>
 
 /*
   This   file    contains   a    function   definitions    for   queue
@@ -26,7 +27,7 @@ node_t *dequeue(queue_t * queue)
 {
 	node_t* first = queue->front;
 
-  //remove primeiro elemento?
+  //remove primeiro elemento
   if(first != NULL) 
   {
     // remove o primeiro elemento e atualiza o começo da fila
@@ -37,19 +38,23 @@ node_t *dequeue(queue_t * queue)
   }
   else
     queue->rear = NULL;
-  
   return first;
 }
 
 // TODO: inserts a node in a queue 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
-void enqueue(queue_t * queue, node_t * item)
+void enqueue(queue_t * queue, node_t * item, int priority)
 {
-  if(queue->rear == NULL)
-    queue->front = item;
+  if(priority)
+    enqueue_sort(queue, item, lt);
   else
-    queue->rear->next = item; 
+  {
+    if(queue->rear == NULL)
+      queue->front = item;
+    else
+      queue->rear->next = item; 
   
-  queue->rear = item;
+    queue->rear = item;
+  }
 }
 
 // TODO: checks if a queue is empty
@@ -58,5 +63,47 @@ int is_empty(queue_t *queue)
 	return queue->front == NULL;
 }
 
+int lt(node_t *a, node_t *b)
+{
+  if (a == NULL || b == NULL) return 1;
+  tcb_t* a_tcb = a->tcb;
+  tcb_t* b_tcb = b->tcb;
+  printf("comparando prioridades\n");
+  printf("  a == %llu, a TID == %d\n  b == %llu, b TID ==%d\n  resultado == %u\n", a_tcb->cpu_time,a_tcb->TID, b_tcb->cpu_time, b_tcb->TID, a_tcb->cpu_time < b_tcb->cpu_time);
+  return a_tcb->cpu_time < b_tcb->cpu_time;
+}
 
 
+void enqueue_sort(queue_t *q, node_t *item, node_lte comp)
+{
+  node_t *p1, *p2;
+  p1 = q->front;
+  p2 = NULL;
+
+  // insere no começo
+  if (comp(item, p1))
+  {
+    item->next = p1;
+    q->front = item;
+    return;
+  }
+
+  p2 = p1;
+  p1 = p1->next;
+
+  while (comp(item, p1) && p1 != NULL)
+  {
+    p2 = p1;
+    p1 = p1->next;
+  }
+
+  if(p1 != NULL) // insere no meio
+  {
+    item->next = p1;
+    p2->next = item;
+  }
+  else // insere no fim
+  {
+    p2->next = item;
+  }
+}

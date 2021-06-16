@@ -4,9 +4,10 @@
 #include <stdint.h>
 
 #include <thread.h>
-
+#include <util.h>
 
 int tid_global = 0;
+unsigned long long current_running_start;
 
 /*
   TODO:  thread_init: initializes  the  thread library  and creates  a
@@ -15,7 +16,6 @@ int tid_global = 0;
  */
 int thread_init()
 {
-	//printf("Começando thread_init()\n");
 	if(current_running != 0)
 		return -EINVAL;
 	// incializa tcb pra main
@@ -27,7 +27,8 @@ int thread_init()
 	// definir status_t(enum) da tcb como running
 	main_thread->status = FIRST_TIME;
 	main_thread->TID = tid_global++;
-	//printf("  Iniciou biblioteca com sucesso\n");
+	main_thread->cpu_time = 0;
+	current_running_start = get_timer();
 	return 0;
 }
 
@@ -36,27 +37,21 @@ int thread_create(thread_t *thread, void *(*start_routine)(void *), void *arg)
 {
 	//printf("criando nova thread com arg == %lld\n", (long long int)start_routine);
 	// cria tcb para a nova thread
-	//printf("1\n");
 	tcb_t* new_thread = (tcb_t*)malloc(sizeof(tcb_t));
 	// coloca o start routine no ultimo indice da pilha, por conta do ret
-	//printf("2\n");
 	new_thread->stack[STACK_SIZE - 1] = &exit_handler;
 	// campo rsp da nova tcb aponta pro ultimo indice da pilha
-	//printf("3\n");
 	new_thread->rsp = &new_thread->stack[STACK_SIZE - 1];
 	// arg fica no rdi que é o registrador de indice 9
-	//printf("4\n");
 	new_thread->registers[9] = arg;
 	// definir status_t(enum) da tcb como ready
-	//printf("5\n");
 	new_thread->status = FIRST_TIME;
 	// criar node_t para a thread e inserir na ready_queue
-	//printf("6\n");
 	node_t* node = node_init(new_thread);
-	//printf("7\n");
-	enqueue(&ready_queue, node);
+	enqueue(&ready_queue, node, PRIORITY);
 	new_thread->TID = tid_global++;
 	new_thread->start_routine = start_routine;
+	new_thread->cpu_time = 0;
 	thread->tcb = new_thread;
 	
 	//printf("  Conseguiu criar nova thread com sucesso, TID == %d\n", new_thread->TID);
@@ -66,12 +61,13 @@ int thread_create(thread_t *thread, void *(*start_routine)(void *), void *arg)
 // TODO: yields the CPU to another thread
 int thread_yield()
 {
-	//printf("vai dar yield \n");
+	unsigned long long exit_time = get_timer();
+	current_running->cpu_time += (exit_time - current_running_start); 
 	current_running->status = READY;
 	node_t* node = node_init(current_running);
-	enqueue(&ready_queue, node);
+	enqueue(&ready_queue, node, PRIORITY);
 	scheduler_entry();
-	//printf(" conseguiu dar yield\n");
+
 	return 0;
 }
 
@@ -112,12 +108,8 @@ void scheduler()
 	//printf("squédiu\n");
 	node_t* node = dequeue(&ready_queue);
 	current_running = node->tcb;
-	//printf("current running == %llu\n", current_running);
-	//if (current_running->status != FIRST_TIME)
-		//current_running->stack[STACK_SIZE - 1] = &exit_handler;
 	current_running->status = RUNNING;
 	//printf("  sqúediu termionu e pah\n");
-	//printf("%lu\n",sizeof(int));
 }
 
 // TODO: you must  make sure this function is called  if a thread does
@@ -125,6 +117,7 @@ void scheduler()
 void exit_handler(void *arg)
 {
 	//printf("vai rodar a funcao\n");
+	current_running_start = get_timer();
 	current_running->start_routine(arg);
 	//printf("ah ieie\n");
 	thread_exit(0);

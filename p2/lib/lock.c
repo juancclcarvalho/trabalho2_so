@@ -51,7 +51,7 @@ void lock_release(lock_t * l)
 // TODO: blocks the running thread
 void block(lock_t * l)
 {
-	enqueue(l->q, node_init(current_running));
+	enqueue(l->q, node_init(current_running), 0);
 	current_running->status = LOCKED;
 	scheduler_entry(); // <--- isso vai fazer a troca de contexto, e NÂO inserir a thread travada na ready queue
 }
@@ -60,7 +60,7 @@ void block(lock_t * l)
 void unblock(lock_t *l)
 {
 	node_t* released_thread = dequeue(l->q);
-	enqueue(&ready_queue, released_thread);
+	enqueue(&ready_queue, released_thread, PRIORITY);
 	tcb_t* tcb = released_thread->tcb;
 	tcb->status = READY;
 }
