@@ -29,8 +29,8 @@ void lock_acquire(lock_t * l)
 		l->status = LOCKED;
 	} else {
 		if(LOCKED == l->status)
-			block(l);
-		l->status = LOCKED;
+			block(l);  // bloqueia a thread
+		l->status = LOCKED; // bloqueia o lock
 	}
 }
 
@@ -42,33 +42,25 @@ void lock_release(lock_t * l)
 		l->status = UNLOCKED;
 	} else {
 		if (l->q->rear == NULL) // SE A LISTA DE THREADS ESPERANDO O LOCK ESTIVER VAZIA
-			l->status = UNLOCKED; // O lock é destravado
+			l->status = UNLOCKED; // O LOCK é destravado
 		else
-			unblock(l);	
+			unblock(l);	// a THREAD no começo da fila é destravada
 	}
 }
 
 // TODO: blocks the running thread
 void block(lock_t * l)
 {
-	enqueue(l->q, node_init(current_running), 0);
-	current_running->status = LOCKED;
+	enqueue(l->q, node_init(current_running), 0); // insere a thread na fila de threads bloqueadas pelo lock l
+	current_running->status = LOCKED; // altera o status da thread
 	scheduler_entry(); // <--- isso vai fazer a troca de contexto, e NÂO inserir a thread travada na ready queue
 }
 
 // TODO: unblocks  a thread that is waiting on a lock.
 void unblock(lock_t *l)
 {
-	node_t* released_thread = dequeue(l->q);
-	enqueue(&ready_queue, released_thread, PRIORITY);
-	tcb_t* tcb = released_thread->tcb;
-	tcb->status = READY;
+	node_t* released_thread = dequeue(l->q); // retira a thread da fila de threads bloqueadas pelo lock l
+	enqueue(&ready_queue, released_thread, PRIORITY); // retorna essa thread para a ready queue
+	tcb_t* tcb = released_thread->tcb; 
+	tcb->status = READY; // seta o status da thread como ready
 }
-
-
-/*
-	O
-	José
-	Tem
-	Coito
-*/

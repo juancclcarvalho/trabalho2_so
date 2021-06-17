@@ -1,6 +1,6 @@
 #include <thread.h>
 #include <stdio.h>
-
+#include <inttypes.h>
 /*
   This   file    contains   a    function   definitions    for   queue
   manipulation. You  are free to  choose your own  implementation. You
@@ -36,24 +36,26 @@ node_t *dequeue(queue_t * queue)
     if(queue->front == NULL) 
       queue->rear = NULL;
   }
-  else
+  else // se o primeiro elemento for vazio
     queue->rear = NULL;
+  
   return first;
 }
 
-// TODO: inserts a node in a queue 🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡🤡
+// TODO: inserts a node in a queue 
 void enqueue(queue_t * queue, node_t * item, int priority)
 {
-  if(priority)
+  // priority é a flag setada no arquivo thread.h
+  if(priority) 
     enqueue_sort(queue, item, lt);
-  else
+  else // FIFO
   {
-    if(queue->rear == NULL)
+    if(queue->rear == NULL) // lista vazia
       queue->front = item;
-    else
+    else // lista não vazia
       queue->rear->next = item; 
   
-    queue->rear = item;
+    queue->rear = item; // sempre inserimos no final
   }
 }
 
@@ -63,41 +65,47 @@ int is_empty(queue_t *queue)
 	return queue->front == NULL;
 }
 
+// função de comparação
+// vai ser chamada em enqueue_sort como a variavel 'comp'
 int lt(node_t *a, node_t *b)
 {
-  if (a == NULL || b == NULL) return 1;
+  if (a == NULL || b == NULL) return 0;
   tcb_t* a_tcb = a->tcb;
   tcb_t* b_tcb = b->tcb;
-  printf("comparando prioridades\n");
-  printf("  a == %llu, a TID == %d\n  b == %llu, b TID ==%d\n  resultado == %u\n", a_tcb->cpu_time,a_tcb->TID, b_tcb->cpu_time, b_tcb->TID, a_tcb->cpu_time < b_tcb->cpu_time);
-  return a_tcb->cpu_time < b_tcb->cpu_time;
+  //printf("comparando prioridades\n");
+  //printf("  a == %" PRIu64 ", a TID == %d\n  b == %" PRIu64 ", b TID ==%d\n  resultado == %u\n", a_tcb->cpu_time,a_tcb->TID, b_tcb->cpu_time, b_tcb->TID, a_tcb->cpu_time < b_tcb->cpu_time);
+  return a_tcb->cpu_time > b_tcb->cpu_time;
 }
 
 
 void enqueue_sort(queue_t *q, node_t *item, node_lte comp)
 {
+  //tcb_t* thread = item->tcb;
+  //printf("REINSERINDO PARA READY QUEUE, TID == %d\n", thread->TID);
   node_t *p1, *p2;
   p1 = q->front;
   p2 = NULL;
 
-  // insere no começo
-  if (comp(item, p1))
+  if(p1 == NULL) // a lista eh vazia
   {
-    item->next = p1;
+    //printf("LISTA VAZIA VAI INSERIR NO COMEÇO\n");
+    item->next = NULL;
     q->front = item;
     return;
   }
 
-  p2 = p1;
-  p1 = p1->next;
-
-  while (comp(item, p1) && p1 != NULL)
+  while (comp(item, p1)) // so vai sair do while quando item <= p1
   {
     p2 = p1;
     p1 = p1->next;
   }
 
-  if(p1 != NULL) // insere no meio
+  if(p2 == NULL) // nunca entrou no laço, insere no começo
+  {
+    item->next = p1;
+    q->front = item;
+  }
+  else if(p1 != NULL) // insere no meio
   {
     item->next = p1;
     p2->next = item;
